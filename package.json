@@ -1,0 +1,108 @@
+{
+  "name": "plumb-mcp",
+  "version": "0.13.2",
+  "mcpName": "io.github.tathagat22/plumb-mcp",
+  "description": "The two-way Figma MCP server: extract designs as compact specs and verify your code with a built-in loop (design → code), OR turn a prompt into a full, on-brand Figma design directed by an AI design director that researches references, extracts a brand, and critiques its own render (prompt → design). No REST rate limits, no metered tool-call quotas, no extra API key. Works on every Figma plan including Free. Drop-in alternative to Figma's Dev Mode MCP and Framelink for Claude Code, Cursor, Windsurf, and any MCP-compatible AI coding agent.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Tathagat Maitray",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tathagat22/plumb-mcp.git"
+  },
+  "homepage": "https://tathagat22.github.io/plumb-mcp/",
+  "bugs": {
+    "url": "https://github.com/tathagat22/plumb-mcp/issues"
+  },
+  "keywords": [
+    "figma",
+    "figma-mcp",
+    "figma-mcp-server",
+    "figma-plugin",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude-code",
+    "claude-mcp",
+    "cursor",
+    "cursor-mcp",
+    "windsurf",
+    "design-to-code",
+    "figma-to-code",
+    "design-tokens",
+    "design-system",
+    "prompt-to-design",
+    "prompt-to-figma",
+    "text-to-design",
+    "text-to-figma",
+    "ai-design",
+    "ai-design-generator",
+    "ai-ui-designer",
+    "ai-design-agent",
+    "design-generator",
+    "figma-generator",
+    "ui-generator",
+    "ai-agent",
+    "ai-coding-agent",
+    "dev-mode",
+    "figma-rate-limit",
+    "anthropic",
+    "verification"
+  ],
+  "bin": {
+    "plumb-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "figma-plugin/code.js",
+    "figma-plugin/ui.html",
+    "figma-plugin/manifest.json",
+    "figma-plugin/icon.png",
+    "figma-plugin/README.md",
+    "README.md",
+    "i18n/README.zh-cn.md",
+    "i18n/README.ja.md",
+    "i18n/README.ko.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup && tsx scripts/build-plugin.ts && npm --prefix studio ci && npm --prefix studio run build",
+    "build:plugin": "tsx scripts/build-plugin.ts",
+    "dev": "tsx scripts/dev.ts",
+    "dev:server": "tsup --watch",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit && tsc -p figma-plugin/tsconfig.json",
+    "prove": "tsx scripts/prove.ts",
+    "outline": "tsx scripts/outline.ts",
+    "live": "tsx scripts/live.ts",
+    "check": "tsx scripts/check.ts",
+    "bridge": "tsx scripts/bridge.ts",
+    "connect": "tsx scripts/connect.ts",
+    "smoke": "tsx scripts/smoke.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "build:studio": "npm --prefix studio ci && npm --prefix studio run build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "openfig-core": "^0.3.7",
+    "ws": "^8.21.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.127.0",
+    "@types/node": "^20.14.0",
+    "@types/ws": "^8.18.1",
+    "esbuild": "^0.28.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitepress": "^1.6.4",
+    "vitest": "^4.1.9"
+  }
+}
