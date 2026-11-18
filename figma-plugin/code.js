@@ -1137,6 +1137,9 @@
     return { type: "STRING", resolvedType: "STRING", value };
   }
   var NODE_NAVS = ["NAVIGATE", "SWAP", "OVERLAY", "SCROLL_TO"];
+  function isSafeLinkUrl(url) {
+    return typeof url === "string" && /^https?:\/\/[^\s\u0000-\u001f\u007f]+$/i.test(url);
+  }
   function buildActions(spec, destId, overlayAt) {
     var _a;
     switch (spec.navigation) {
@@ -1145,7 +1148,7 @@
       case "CLOSE":
         return [{ type: "CLOSE" }];
       case "URL":
-        return spec.url ? [{ type: "URL", url: spec.url }] : [];
+        return isSafeLinkUrl(spec.url) ? [{ type: "URL", url: spec.url }] : [];
       case "SET_VAR": {
         const vars = (_a = spec.setVars) != null ? _a : {};
         const actions = [];
@@ -1737,10 +1740,18 @@
     return "PNG";
   }
   var uploadAcks = /* @__PURE__ */ new Map();
+  var UPLOAD_ACK_TIMEOUT_MS = 6e4;
   async function uploadBytes(bytes, ext, reqId, index) {
     const ackKey = `${reqId}-${index}`;
     const ack = new Promise((resolve, reject) => {
-      uploadAcks.set(ackKey, (error) => error ? reject(new Error(error)) : resolve());
+      const timer = setTimeout(() => {
+        uploadAcks.delete(ackKey);
+        reject(new Error(`Upload timed out waiting for acknowledgement: ${ackKey}`));
+      }, UPLOAD_ACK_TIMEOUT_MS);
+      uploadAcks.set(ackKey, (error) => {
+        clearTimeout(timer);
+        error ? reject(new Error(error)) : resolve();
+      });
     });
     figma.ui.postMessage({
       type: "upload-asset",

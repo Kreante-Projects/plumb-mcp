@@ -322,6 +322,8 @@
       // verbs (apply-design/apply-foundations/apply-motion). No allow-set to
       // keep in sync as new verbs land.
       if (msg.reqId && typeof msg.t === "string") {
+        // Security: only a paired server may drive the plugin worker.
+        if (!s.paired) return;
         // Rewrite reqId so different servers' reqIds (both mint `r1`) can't
         // collide on the plugin-worker side. Original reqId stays on the wire.
         var mainReqId = rewriteIn(port, msg.reqId);
@@ -333,7 +335,8 @@
         // the loopback /asset route BEFORE forwarding to main (once).
         if (msg.t === "apply-design" && copy.plan && copy.plan.assets && copy.plan.assets.length) {
           hydrateAssets(port, copy, function (hydrated) {
-            toMain({ type: "server-request", req: hydrated });
+            // The session may have closed while the assets were loading.
+            if (s.paired && routing[mainReqId]) toMain({ type: "server-request", req: hydrated });
           });
         } else {
           toMain({ type: "server-request", req: copy });
@@ -509,7 +512,7 @@
   function uploadScreenshot(msg) {
     var port = portOf(msg.reqId);
     var s = port && sessions[port];
-    if (!s) return;
+    if (!s || !s.paired) return;
     var ext = (msg.format || "PNG").toLowerCase();
     var origReqId = originalOf(msg.reqId);
     var url = "http://localhost:" + port + "/upload/" + origReqId + "." + ext;
@@ -545,7 +548,11 @@
   function uploadAsset(msg) {
     var port = portOf(msg.reqId);
     var s = port && sessions[port];
-    if (!s) return;
+    if (!s || !s.paired) {
+      // Always acknowledge, otherwise the worker waits for this upload.
+      toMain({ type: "upload-ack", reqId: msg.reqId, index: msg.index, error: "Plumb session is not paired" });
+      return;
+    }
     var origReqId = originalOf(msg.reqId);
     var ext = msg.ext || "bin";
     var url = "http://localhost:" + port +
